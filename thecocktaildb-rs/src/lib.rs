@@ -10,13 +10,13 @@ pub enum Error {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct DrinksDto {
-    drinks: Vec<DrinkDto>,
+struct CocktailsDto {
+    drinks: Vec<CocktailDto>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct DrinkDto {
+struct CocktailDto {
     id_drink: Option<String>,
     #[serde(rename = "strDrink")]
     drink: Option<String>,
@@ -144,19 +144,19 @@ struct MeasureDto {
     fifteenth: Option<String>,
 }
 
-pub struct Drinks {
-    pub drinks: Vec<Drink>,
+pub struct Cocktails {
+    pub cocktails: Vec<Cocktail>,
 }
 
-impl From<DrinksDto> for Drinks {
-    fn from(value: DrinksDto) -> Self {
+impl From<CocktailsDto> for Cocktails {
+    fn from(value: CocktailsDto) -> Self {
         Self {
-            drinks: value.drinks.into_iter().map(Into::into).collect(),
+            cocktails: value.drinks.into_iter().map(Into::into).collect(),
         }
     }
 }
 
-pub struct Drink {
+pub struct Cocktail {
     pub id_drink: Option<String>,
     pub drink: Option<String>,
     pub drink_alternate: Option<String>,
@@ -175,8 +175,8 @@ pub struct Drink {
     pub date_modified: Option<String>,
 }
 
-impl From<DrinkDto> for Drink {
-    fn from(value: DrinkDto) -> Self {
+impl From<CocktailDto> for Cocktail {
+    fn from(value: CocktailDto) -> Self {
         Self {
             id_drink: value.id_drink,
             drink: value.drink,
