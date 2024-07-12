@@ -1,5 +1,10 @@
-use derive_more::Deref;
+use derive_more::{Deref, Display};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
+
+#[derive(Debug, Display, Error)]
+pub enum Error {
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
