@@ -144,6 +144,7 @@ struct MeasureDto {
     fifteenth: Option<String>,
 }
 
+#[derive(Debug)]
 pub struct Cocktails {
     pub cocktails: Vec<Cocktail>,
 }
@@ -156,6 +157,7 @@ impl From<CocktailsDto> for Cocktails {
     }
 }
 
+#[derive(Debug)]
 pub struct Cocktail {
     pub id_drink: Option<String>,
     pub drink: Option<String>,
