@@ -1,5 +1,8 @@
 use derive_more::Deref;
 use serde::{Deserialize, Serialize};
+use tracing::instrument;
+
+use crate::{Client, Error};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct MeasureDto {
@@ -36,7 +39,7 @@ pub(crate) struct MeasureDto {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct IngredientsDto {
+pub(crate) struct StaticIngredientsDto {
     #[serde(rename = "strIngredient1")]
     first: Option<String>,
     #[serde(rename = "strIngredient2")]
@@ -69,17 +72,115 @@ pub(crate) struct IngredientsDto {
     fifteenth: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct DynamicIngredientsDto {
+    ingredients: Vec<IngredientDto>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct IngredientDto {
+    #[serde(rename = "idIngredient")]
+    id: Option<String>,
+    #[serde(rename = "strIngredient")]
+    ingredient: Option<String>,
+    #[serde(rename = "strDescription")]
+    description: Option<String>,
+    #[serde(rename = "strType")]
+    kind: Option<String>,
+    #[serde(rename = "strAlcohol")]
+    alcohol: Option<String>,
+    #[serde(rename = "strABV")]
+    abv: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct IngredientListDto {
+    #[serde(rename = "strIngredient1")]
+    ingredient: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct IngredientsListDto {
+    drinks: Vec<IngredientListDto>,
+}
+
 #[derive(Debug)]
 pub struct Ingredient {
-    pub name: String,
-    pub measure: String,
+    pub ingredient: Option<String>,
+    pub measure: Option<String>,
+    pub id: Option<String>,
+    pub description: Option<String>,
+    pub kind: Option<String>,
+    pub alcohol: Option<String>,
+    pub abv: Option<String>,
+}
+
+impl Ingredient {
+    /// Search ingredient by name
+    #[instrument]
+    pub async fn by_name(client: &Client, name: &str) -> Result<Ingredients, Error> {
+        let mut url = client.base_url.join("search.php")?;
+        url.set_query(Some(&format!("i={}", name)));
+        Ok(reqwest::get(url.to_string()).await?.json::<DynamicIngredientsDto>().await?.into())
+    }
+
+    /// Lookup ingredient by ID
+    #[instrument]
+    pub async fn by_id(client: &Client, id: &str) -> Result<Ingredients, Error> {
+        let mut url = client.base_url.join("lookup.php")?;
+        url.set_query(Some(&format!("iid={}", id)));
+        Ok(reqwest::get(url.to_string()).await?.json::<DynamicIngredientsDto>().await?.into())
+    }
+
+    /// List the ingredients
+    #[instrument]
+    pub async fn list(client: &Client) -> Result<Ingredients, Error> {
+        Ok(reqwest::get(client.base_url.join("list.php?i=list")?.to_string())
+            .await?
+            .json::<IngredientsListDto>()
+            .await?
+            .into())
+    }
 }
 
 impl From<(String, String)> for Ingredient {
     fn from(value: (String, String)) -> Self {
         Self {
-            name: value.0,
-            measure: value.1,
+            ingredient: Some(value.0),
+            measure: Some(value.1),
+            id: None,
+            description: None,
+            kind: None,
+            alcohol: None,
+            abv: None,
+        }
+    }
+}
+
+impl From<IngredientListDto> for Ingredient {
+    fn from(value: IngredientListDto) -> Self {
+        Self {
+            ingredient: value.ingredient,
+            measure: None,
+            id: None,
+            description: None,
+            kind: None,
+            alcohol: None,
+            abv: None,
+        }
+    }
+}
+
+impl From<IngredientDto> for Ingredient {
+    fn from(value: IngredientDto) -> Self {
+        Self {
+            ingredient: value.ingredient,
+            measure: None,
+            id: value.id,
+            description: value.description,
+            kind: value.kind,
+            alcohol: value.alcohol,
+            abv: value.abv,
         }
     }
 }
@@ -87,8 +188,20 @@ impl From<(String, String)> for Ingredient {
 #[derive(Debug, Deref)]
 pub struct Ingredients(Vec<Ingredient>);
 
-impl From<(IngredientsDto, MeasureDto)> for Ingredients {
-    fn from(value: (IngredientsDto, MeasureDto)) -> Self {
+impl From<DynamicIngredientsDto> for Ingredients {
+    fn from(value: DynamicIngredientsDto) -> Self {
+        Self(value.ingredients.into_iter().map(Into::into).collect())
+    }
+}
+
+impl From<IngredientsListDto> for Ingredients {
+    fn from(value: IngredientsListDto) -> Self {
+        Self(value.drinks.into_iter().map(Into::into).collect())
+    }
+}
+
+impl From<(StaticIngredientsDto, MeasureDto)> for Ingredients {
+    fn from(value: (StaticIngredientsDto, MeasureDto)) -> Self {
         let mut ingredients = vec![];
 
         let val = value.0.first.zip(value.1.first);

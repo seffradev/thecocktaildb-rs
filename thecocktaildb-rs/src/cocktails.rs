@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use tracing::instrument;
 
 use crate::{
-    ingredients::{Ingredients, IngredientsDto, MeasureDto},
+    ingredients::{Ingredients, MeasureDto, StaticIngredientsDto},
     Client, Error,
 };
 
@@ -61,7 +61,7 @@ struct CocktailDto {
     #[serde(rename = "strDrinkThumb")]
     drink_thumb: Option<String>,
     #[serde(flatten)]
-    ingredients: IngredientsDto,
+    ingredients: StaticIngredientsDto,
     #[serde(flatten)]
     measure: MeasureDto,
     #[serde(rename = "strImageSource")]
