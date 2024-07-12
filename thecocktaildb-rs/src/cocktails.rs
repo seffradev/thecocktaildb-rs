@@ -1,3 +1,4 @@
+use derive_more::Deref;
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
 
@@ -74,19 +75,6 @@ struct CocktailDto {
 }
 
 #[derive(Debug)]
-pub struct Cocktails {
-    pub cocktails: Vec<Cocktail>,
-}
-
-impl From<CocktailsDto> for Cocktails {
-    fn from(value: CocktailsDto) -> Self {
-        Self {
-            cocktails: value.drinks.into_iter().map(Into::into).collect(),
-        }
-    }
-}
-
-#[derive(Debug)]
 pub struct Cocktail {
     pub id_drink: Option<String>,
     pub drink: Option<String>,
@@ -104,120 +92,6 @@ pub struct Cocktail {
     pub image_attribution: Option<String>,
     pub creative_commons_confirmed: Option<String>,
     pub date_modified: Option<String>,
-}
-
-impl Cocktail {
-    /// Lookup a random cocktail
-    #[instrument]
-    pub async fn random(client: &Client) -> Result<Cocktails, Error> {
-        Ok(reqwest::get((&client.base_url.join("random.php")?).to_string())
-            .await?
-            .json::<CocktailsDto>()
-            .await?
-            .into())
-    }
-
-    /// Lookup a selection of 10 random cocktails
-    ///
-    /// *Note*: Only available to $2+ [Patreon Supporters](https://www.patreon.com/thedatadb)
-    #[instrument]
-    pub async fn multiple_random(client: &Client) -> Result<Cocktails, Error> {
-        Ok(reqwest::get((&client.base_url.join("randomselection.php")?).to_string())
-            .await?
-            .json::<CocktailsDto>()
-            .await?
-            .into())
-    }
-
-    /// List popular cocktails
-    ///
-    /// *Note*: Only available to $2+ [Patreon Supporters](https://www.patreon.com/thedatadb)
-    #[instrument]
-    pub async fn popular(client: &Client) -> Result<Cocktails, Error> {
-        Ok(reqwest::get((&client.base_url.join("popular.php")?).to_string())
-            .await?
-            .json::<CocktailsDto>()
-            .await?
-            .into())
-    }
-
-    /// List mot latest cocktails
-    ///
-    /// *Note*: Only available to $2+ [Patreon Supporters](https://www.patreon.com/thedatadb)
-    #[instrument]
-    pub async fn latest(client: &Client) -> Result<Cocktails, Error> {
-        Ok(reqwest::get((&client.base_url.join("popular.php")?).to_string())
-            .await?
-            .json::<CocktailsDto>()
-            .await?
-            .into())
-    }
-
-    /// Search cocktail by name
-    #[instrument]
-    pub async fn by_name(client: &Client, name: &str) -> Result<Cocktails, Error> {
-        let mut url = client.base_url.join("search.php")?;
-        url.set_query(Some(&format!("s={}", name)));
-        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
-    }
-
-    /// List all cocktails by first letter
-    #[instrument]
-    pub async fn by_first_letter(client: &Client, letter: char) -> Result<Cocktails, Error> {
-        let mut url = client.base_url.join("search.php")?;
-        url.set_query(Some(&format!("f={}", letter)));
-        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
-    }
-
-    /// Lookup full cocktail details by id
-    #[instrument]
-    pub async fn by_id(client: &Client, id: &str) -> Result<Cocktails, Error> {
-        let mut url = client.base_url.join("search.php")?;
-        url.set_query(Some(&format!("i={}", id)));
-        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
-    }
-
-    /// Search by ingredient
-    #[instrument]
-    pub async fn by_ingredient(client: &Client, ingredient: &str) -> Result<Cocktails, Error> {
-        let mut url = client.base_url.join("filter.php")?;
-        url.set_query(Some(&format!("i={}", ingredient)));
-        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
-    }
-
-    /// Filter by multi-ingredient
-    ///
-    /// *Note*: Only available to $2+ [Patreon Supporters](https://www.patreon.com/thedatadb)
-    #[instrument]
-    pub async fn by_ingredients(client: &Client, ingredients: Vec<&str>) -> Result<Cocktails, Error> {
-        let mut url = client.base_url.join("filter.php")?;
-        url.set_query(Some(&format!("i={}", ingredients.join(","))));
-        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
-    }
-
-    /// Filter by alcoholic
-    #[instrument]
-    pub async fn by_alcoholic(client: &Client, alcoholic: &str) -> Result<Cocktails, Error> {
-        let mut url = client.base_url.join("filter.php")?;
-        url.set_query(Some(&format!("a={}", alcoholic)));
-        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
-    }
-
-    /// Filter by category
-    #[instrument]
-    pub async fn by_category(client: &Client, category: &str) -> Result<Cocktails, Error> {
-        let mut url = client.base_url.join("filter.php")?;
-        url.set_query(Some(&format!("c={}", category)));
-        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
-    }
-
-    /// Filter by glass
-    #[instrument]
-    pub async fn by_glass(client: &Client, glass: &str) -> Result<Cocktails, Error> {
-        let mut url = client.base_url.join("filter.php")?;
-        url.set_query(Some(&format!("g={}", glass)));
-        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
-    }
 }
 
 impl From<CocktailDto> for Cocktail {
@@ -240,5 +114,128 @@ impl From<CocktailDto> for Cocktail {
             creative_commons_confirmed: value.creative_commons_confirmed,
             date_modified: value.date_modified,
         }
+    }
+}
+
+#[derive(Debug, Deref)]
+pub struct Cocktails(Vec<Cocktail>);
+
+impl Cocktails {
+    /// Lookup a random cocktail
+    #[instrument]
+    pub async fn random(client: &Client) -> Result<Self, Error> {
+        Ok(reqwest::get((&client.base_url.join("random.php")?).to_string())
+            .await?
+            .json::<CocktailsDto>()
+            .await?
+            .into())
+    }
+
+    /// Lookup a selection of 10 random cocktails
+    ///
+    /// *Note*: Only available to $2+ [Patreon Supporters](https://www.patreon.com/thedatadb)
+    #[instrument]
+    pub async fn multiple_random(client: &Client) -> Result<Self, Error> {
+        Ok(reqwest::get((&client.base_url.join("randomselection.php")?).to_string())
+            .await?
+            .json::<CocktailsDto>()
+            .await?
+            .into())
+    }
+
+    /// List popular cocktails
+    ///
+    /// *Note*: Only available to $2+ [Patreon Supporters](https://www.patreon.com/thedatadb)
+    #[instrument]
+    pub async fn popular(client: &Client) -> Result<Self, Error> {
+        Ok(reqwest::get((&client.base_url.join("popular.php")?).to_string())
+            .await?
+            .json::<CocktailsDto>()
+            .await?
+            .into())
+    }
+
+    /// List mot latest cocktails
+    ///
+    /// *Note*: Only available to $2+ [Patreon Supporters](https://www.patreon.com/thedatadb)
+    #[instrument]
+    pub async fn latest(client: &Client) -> Result<Self, Error> {
+        Ok(reqwest::get((&client.base_url.join("popular.php")?).to_string())
+            .await?
+            .json::<CocktailsDto>()
+            .await?
+            .into())
+    }
+
+    /// Search cocktail by name
+    #[instrument]
+    pub async fn by_name(client: &Client, name: &str) -> Result<Self, Error> {
+        let mut url = client.base_url.join("search.php")?;
+        url.set_query(Some(&format!("s={}", name)));
+        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
+    }
+
+    /// List all cocktails by first letter
+    #[instrument]
+    pub async fn by_first_letter(client: &Client, letter: char) -> Result<Self, Error> {
+        let mut url = client.base_url.join("search.php")?;
+        url.set_query(Some(&format!("f={}", letter)));
+        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
+    }
+
+    /// Lookup full cocktail details by id
+    #[instrument]
+    pub async fn by_id(client: &Client, id: &str) -> Result<Self, Error> {
+        let mut url = client.base_url.join("search.php")?;
+        url.set_query(Some(&format!("i={}", id)));
+        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
+    }
+
+    /// Search by ingredient
+    #[instrument]
+    pub async fn by_ingredient(client: &Client, ingredient: &str) -> Result<Self, Error> {
+        let mut url = client.base_url.join("filter.php")?;
+        url.set_query(Some(&format!("i={}", ingredient)));
+        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
+    }
+
+    /// Filter by multi-ingredient
+    ///
+    /// *Note*: Only available to $2+ [Patreon Supporters](https://www.patreon.com/thedatadb)
+    #[instrument]
+    pub async fn by_ingredients(client: &Client, ingredients: Vec<&str>) -> Result<Self, Error> {
+        let mut url = client.base_url.join("filter.php")?;
+        url.set_query(Some(&format!("i={}", ingredients.join(","))));
+        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
+    }
+
+    /// Filter by alcoholic
+    #[instrument]
+    pub async fn by_alcoholic(client: &Client, alcoholic: &str) -> Result<Self, Error> {
+        let mut url = client.base_url.join("filter.php")?;
+        url.set_query(Some(&format!("a={}", alcoholic)));
+        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
+    }
+
+    /// Filter by category
+    #[instrument]
+    pub async fn by_category(client: &Client, category: &str) -> Result<Self, Error> {
+        let mut url = client.base_url.join("filter.php")?;
+        url.set_query(Some(&format!("c={}", category)));
+        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
+    }
+
+    /// Filter by glass
+    #[instrument]
+    pub async fn by_glass(client: &Client, glass: &str) -> Result<Self, Error> {
+        let mut url = client.base_url.join("filter.php")?;
+        url.set_query(Some(&format!("g={}", glass)));
+        Ok(reqwest::get(url.to_string()).await?.json::<CocktailsDto>().await?.into())
+    }
+}
+
+impl From<CocktailsDto> for Cocktails {
+    fn from(value: CocktailsDto) -> Self {
+        Self(value.drinks.into_iter().map(Into::into).collect())
     }
 }

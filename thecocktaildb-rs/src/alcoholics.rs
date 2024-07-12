@@ -18,18 +18,6 @@ pub(crate) struct AlcoholicsDto {
 #[derive(Debug, Deref)]
 pub struct Alcoholic(String);
 
-impl Alcoholic {
-    /// List the alcoholics
-    #[instrument]
-    pub async fn list(client: &Client) -> Result<Alcoholics, Error> {
-        Ok(reqwest::get(client.base_url.join("list.php?a=list")?.to_string())
-            .await?
-            .json::<AlcoholicsDto>()
-            .await?
-            .into())
-    }
-}
-
 impl From<AlcoholicDto> for Alcoholic {
     fn from(value: AlcoholicDto) -> Self {
         Self(value.alcoholic)
@@ -38,6 +26,18 @@ impl From<AlcoholicDto> for Alcoholic {
 
 #[derive(Debug, Deref)]
 pub struct Alcoholics(Vec<Alcoholic>);
+
+impl Alcoholics {
+    /// List the alcoholics
+    #[instrument]
+    pub async fn list(client: &Client) -> Result<Self, Error> {
+        Ok(reqwest::get(client.base_url.join("list.php?a=list")?.to_string())
+            .await?
+            .json::<AlcoholicsDto>()
+            .await?
+            .into())
+    }
+}
 
 impl From<AlcoholicsDto> for Alcoholics {
     fn from(value: AlcoholicsDto) -> Self {

@@ -18,18 +18,6 @@ pub(crate) struct CategoriesDto {
 #[derive(Debug, Deref)]
 pub struct Category(String);
 
-impl Category {
-    /// List the categories
-    #[instrument]
-    pub async fn list(client: &Client) -> Result<Categories, Error> {
-        Ok(reqwest::get(client.base_url.join("list.php?c=list")?.to_string())
-            .await?
-            .json::<CategoriesDto>()
-            .await?
-            .into())
-    }
-}
-
 impl From<CategoryDto> for Category {
     fn from(value: CategoryDto) -> Self {
         Self(value.alcoholic)
@@ -38,6 +26,18 @@ impl From<CategoryDto> for Category {
 
 #[derive(Debug, Deref)]
 pub struct Categories(Vec<Category>);
+
+impl Categories {
+    /// List the categories
+    #[instrument]
+    pub async fn list(client: &Client) -> Result<Self, Error> {
+        Ok(reqwest::get(client.base_url.join("list.php?c=list")?.to_string())
+            .await?
+            .json::<CategoriesDto>()
+            .await?
+            .into())
+    }
+}
 
 impl From<CategoriesDto> for Categories {
     fn from(value: CategoriesDto) -> Self {

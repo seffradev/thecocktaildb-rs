@@ -8,12 +8,12 @@ mod cocktails;
 mod glasses;
 mod ingredients;
 
-pub use alcoholics::Alcoholic;
-pub use categories::Category;
+pub use alcoholics::Alcoholics;
+pub use categories::Categories;
 pub use client::Client;
-pub use cocktails::Cocktail;
-pub use glasses::Glass;
-pub use ingredients::Ingredient;
+pub use cocktails::Cocktails;
+pub use glasses::Glasses;
+pub use ingredients::Ingredients;
 
 #[derive(Debug, Display, Error)]
 pub enum Error {

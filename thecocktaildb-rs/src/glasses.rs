@@ -18,10 +18,10 @@ pub(crate) struct GlassesDto {
 #[derive(Debug, Deref)]
 pub struct Glass(String);
 
-impl Glass {
+impl Glasses {
     /// List the glasses
     #[instrument]
-    pub async fn list(client: &Client) -> Result<Glasses, Error> {
+    pub async fn list(client: &Client) -> Result<Self, Error> {
         Ok(reqwest::get(client.base_url.join("list.php?g=list")?.to_string())
             .await?
             .json::<GlassesDto>()

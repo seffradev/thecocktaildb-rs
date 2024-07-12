@@ -115,34 +115,6 @@ pub struct Ingredient {
     pub abv: Option<String>,
 }
 
-impl Ingredient {
-    /// Search ingredient by name
-    #[instrument]
-    pub async fn by_name(client: &Client, name: &str) -> Result<Ingredients, Error> {
-        let mut url = client.base_url.join("search.php")?;
-        url.set_query(Some(&format!("i={}", name)));
-        Ok(reqwest::get(url.to_string()).await?.json::<DynamicIngredientsDto>().await?.into())
-    }
-
-    /// Lookup ingredient by ID
-    #[instrument]
-    pub async fn by_id(client: &Client, id: &str) -> Result<Ingredients, Error> {
-        let mut url = client.base_url.join("lookup.php")?;
-        url.set_query(Some(&format!("iid={}", id)));
-        Ok(reqwest::get(url.to_string()).await?.json::<DynamicIngredientsDto>().await?.into())
-    }
-
-    /// List the ingredients
-    #[instrument]
-    pub async fn list(client: &Client) -> Result<Ingredients, Error> {
-        Ok(reqwest::get(client.base_url.join("list.php?i=list")?.to_string())
-            .await?
-            .json::<IngredientsListDto>()
-            .await?
-            .into())
-    }
-}
-
 impl From<(String, String)> for Ingredient {
     fn from(value: (String, String)) -> Self {
         Self {
@@ -187,6 +159,34 @@ impl From<IngredientDto> for Ingredient {
 
 #[derive(Debug, Deref)]
 pub struct Ingredients(Vec<Ingredient>);
+
+impl Ingredients {
+    /// Search ingredient by name
+    #[instrument]
+    pub async fn by_name(client: &Client, name: &str) -> Result<Self, Error> {
+        let mut url = client.base_url.join("search.php")?;
+        url.set_query(Some(&format!("i={}", name)));
+        Ok(reqwest::get(url.to_string()).await?.json::<DynamicIngredientsDto>().await?.into())
+    }
+
+    /// Lookup ingredient by ID
+    #[instrument]
+    pub async fn by_id(client: &Client, id: &str) -> Result<Self, Error> {
+        let mut url = client.base_url.join("lookup.php")?;
+        url.set_query(Some(&format!("iid={}", id)));
+        Ok(reqwest::get(url.to_string()).await?.json::<DynamicIngredientsDto>().await?.into())
+    }
+
+    /// List the ingredients
+    #[instrument]
+    pub async fn list(client: &Client) -> Result<Self, Error> {
+        Ok(reqwest::get(client.base_url.join("list.php?i=list")?.to_string())
+            .await?
+            .json::<IngredientsListDto>()
+            .await?
+            .into())
+    }
+}
 
 impl From<DynamicIngredientsDto> for Ingredients {
     fn from(value: DynamicIngredientsDto) -> Self {
