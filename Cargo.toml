@@ -1,4 +1,5 @@
 [workspace]
 members = ["thecocktaildb-rs"]
 package.authors = ["Hampus Avekvist <hampus.avekvist@hey.com>"]
+package.license-file = "LICENSE.md"
 resolver = "2"

@@ -1,6 +1,8 @@
 [package]
 authors.workspace = true
+description = "An API client for TheCocktailDB API"
 edition = "2021"
+license-file.workspace = true
 name = "thecocktaildb-rs"
 version = "0.1.0"
 
