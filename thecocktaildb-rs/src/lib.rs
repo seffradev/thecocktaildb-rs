@@ -165,6 +165,17 @@ impl From<(IngredientsDto, MeasureDto)> for Ingredients {
     }
 }
 
+#[derive(Debug)]
+pub struct Client {
+    api_key: String,
+}
+
+impl Client {
+    pub fn new(api_key: String) -> Self {
+        Self { api_key }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
