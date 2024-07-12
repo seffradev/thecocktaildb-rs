@@ -13,11 +13,3 @@ pub use ingredients::Ingredient;
 pub enum Error {
     Url(#[from] url::ParseError),
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert!(false);
-    }
-}
