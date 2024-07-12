@@ -1,9 +1,12 @@
 use derive_more::{Deref, Display};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use tracing::instrument;
+use url::Url;
 
 #[derive(Debug, Display, Error)]
 pub enum Error {
+    Url(#[from] url::ParseError),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -172,12 +175,15 @@ impl From<(IngredientsDto, MeasureDto)> for Ingredients {
 
 #[derive(Debug)]
 pub struct Client {
-    api_key: String,
+    base_url: Url,
 }
 
 impl Client {
-    pub fn new(api_key: String) -> Self {
-        Self { api_key }
+    #[instrument]
+    pub fn new(api_key: &str) -> Result<Self, Error> {
+        Ok(Self {
+            base_url: Url::parse("https://www.thecocktaildb.com/api/json/v1/")?.join(&(api_key.to_string() + &String::from("/")))?,
+        })
     }
 }
 
