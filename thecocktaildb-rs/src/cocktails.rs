@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
+use tracing::instrument;
 
-use crate::ingredients::{Ingredients, IngredientsDto, MeasureDto};
+use crate::{
+    ingredients::{Ingredients, IngredientsDto, MeasureDto},
+    Client, Error,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Instructions {
@@ -100,6 +104,17 @@ pub struct Cocktail {
     pub image_attribution: Option<String>,
     pub creative_commons_confirmed: Option<String>,
     pub date_modified: Option<String>,
+}
+
+impl Cocktail {
+    #[instrument]
+    pub async fn random(client: &Client) -> Result<Cocktails, Error> {
+        Ok(reqwest::get((&client.base_url.join("random.php")?).to_string())
+            .await?
+            .json::<CocktailsDto>()
+            .await?
+            .into())
+    }
 }
 
 impl From<CocktailDto> for Cocktail {

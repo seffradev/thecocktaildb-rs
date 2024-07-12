@@ -5,7 +5,7 @@ use crate::Error;
 
 #[derive(Debug)]
 pub struct Client {
-    base_url: Url,
+    pub(crate) base_url: Url,
 }
 
 impl Client {

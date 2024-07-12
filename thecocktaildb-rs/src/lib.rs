@@ -12,4 +12,5 @@ pub use ingredients::Ingredient;
 #[derive(Debug, Display, Error)]
 pub enum Error {
     Url(#[from] url::ParseError),
+    Reqwest(#[from] reqwest::Error),
 }
