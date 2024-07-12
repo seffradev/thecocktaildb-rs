@@ -1,16 +1,16 @@
 use derive_more::Deref;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use tracing::instrument;
 
 use crate::{Client, Error};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct CategoryDto {
     #[serde(rename = "strCategory")]
     alcoholic: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct CategoriesDto {
     drinks: Vec<CategoryDto>,
 }

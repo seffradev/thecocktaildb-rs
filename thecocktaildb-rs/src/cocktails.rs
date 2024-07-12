@@ -1,5 +1,5 @@
 use derive_more::Deref;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use tracing::instrument;
 
 use crate::{
@@ -7,7 +7,7 @@ use crate::{
     Client, Error,
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Instructions {
     /// English translation
     #[serde(rename = "strInstructions")]
@@ -32,12 +32,12 @@ pub struct Instructions {
     pub zh_hant: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 struct CocktailsDto {
     drinks: Vec<CocktailDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct CocktailDto {
     id_drink: Option<String>,

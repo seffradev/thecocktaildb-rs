@@ -1,10 +1,10 @@
 use derive_more::Deref;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use tracing::instrument;
 
 use crate::{Client, Error};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct MeasureDto {
     #[serde(rename = "strMeasure1")]
     first: Option<String>,
@@ -38,7 +38,7 @@ pub(crate) struct MeasureDto {
     fifteenth: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct StaticIngredientsDto {
     #[serde(rename = "strIngredient1")]
     first: Option<String>,
@@ -72,12 +72,12 @@ pub(crate) struct StaticIngredientsDto {
     fifteenth: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct DynamicIngredientsDto {
     ingredients: Vec<IngredientDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct IngredientDto {
     #[serde(rename = "idIngredient")]
     id: Option<String>,
@@ -93,13 +93,13 @@ pub(crate) struct IngredientDto {
     abv: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct IngredientListDto {
     #[serde(rename = "strIngredient1")]
     ingredient: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct IngredientsListDto {
     drinks: Vec<IngredientListDto>,
 }
