@@ -11,7 +11,7 @@ derive_more = { version = "2.0.1", features = ["deref", "display"] }
 reqwest = { version = "0.12.12", features = ["json"] }
 serde = { version = "1.0.218", features = ["derive"] }
 serde_json = "1.0.139"
-thiserror = "2.0.11"
+thiserror = "2.0.12"
 tracing = "0.1.41"
 url = "2.5.4"
 
