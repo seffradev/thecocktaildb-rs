@@ -1203,7 +1203,7 @@ dependencies = [
 
 [[package]]
 name = "thecocktaildb-rs"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "derive_more",
  "reqwest",
