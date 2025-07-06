@@ -13,7 +13,7 @@ build-dir = "target/book"
 
 [output.html]
 cname = "seffra.dev"
-edit-url-template = "https://github.com/seffradev/thecocktaildb-rs/edit/trunk/{path}"
+edit-url-template = "https://github.com/seffradev/thecocktaildb-rs/edit/main/{path}"
 git-repository-url = "https://github.com/seffradev/thecocktaildb-rs"
 preferred-dark-theme = "ayu"
 smart-punctuation = true
